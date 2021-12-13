@@ -1,0 +1,28 @@
+vivunUrl: "https://api.vivun.com/v2/export/"
+
+#fetch new data since date. If empty, fetch all time
+#in yyyy-MM-dd format
+fetchSince:
+
+es:
+  enrichPolicies:
+    deliverables: activity-deliverable-policy
+    opportunities: activity-opportunity-policy
+  indices:
+    deliverables: deliverables
+    opportunities: opportunities
+    activities: activities
+  client:
+    url: <ES URL>
+    user: <USER>
+    pass: <PASSWORD>
+
+#used for opportunities export
+teams:
+  - Team ID 1
+  - Team ID 2
+
+# used for activities and deliverables export
+names:
+  - Person 1
+  - Person 2

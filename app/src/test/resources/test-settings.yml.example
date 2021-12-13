@@ -1,0 +1,14 @@
+vivunUrl: "https://api.vivun.com/v2/export/"
+
+es:
+  index:
+    deliverables: deliverables2
+    opportunities: opportunities2
+    activities: activities2
+  url: <ES URL>
+  user: <ES USER>
+  pass: <ES USER PASS>
+
+names:
+ - Person 1
+ - Person 2

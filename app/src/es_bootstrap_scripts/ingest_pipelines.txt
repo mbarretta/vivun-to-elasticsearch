@@ -1,0 +1,1150 @@
+PUT _ingest/pipeline/activities-pipeline
+{
+  "description": "Ingest pipeline created by text structure finder",
+  "processors": [
+    {
+      "csv": {
+        "field": "message",
+        "target_fields": [
+          "Owner",
+          "Account",
+          "Opportunity",
+          "Type",
+          "Description",
+          "Date",
+          "Hours",
+          "Deliverable",
+          "Deleted",
+          "Created Date",
+          "Created By",
+          "Last Modified Date",
+          "Last Modified By",
+          "Last Viewed Date",
+          "Last Referenced Date",
+          "Created Stage",
+          "Default Hours",
+          "Focus",
+          "Hero Activity Flag",
+          "Presales Stage",
+          "Source",
+          "Status",
+          "Hero Activity Number"
+        ],
+        "ignore_missing": false
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Created Date"
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Modified Date"
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Referenced Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Viewed Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "Date",
+        "copy_from": "Created Date",
+        "if": "ctx?.Date == null || ctx?.Date?.isEmpty()"
+      }
+    },
+    {
+      "date": {
+        "field": "Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Date"
+      }
+    },
+    {
+      "date": {
+        "field": "Created Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Created Date"
+      }
+    },
+    {
+      "date": {
+        "field": "Last Modified Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Modified Date"
+      }
+    },
+    {
+      "date": {
+        "field": "Last Referenced Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Referenced Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Viewed Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Viewed Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Default Hours",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Hero Activity Flag",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Hours",
+        "type": "double",
+        "ignore_missing": true
+      }
+    },
+    {
+      "fingerprint": {
+        "fields": [
+          "Deliverable",
+          "Account"
+        ],
+        "target_field": "deliverable_account_hash",
+        "method": "MD5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "fingerprint": {
+        "fields": [
+          "Opportunity",
+          "Account"
+        ],
+        "target_field": "opportunity_account_hash",
+        "method": "MD5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "enrich": {
+        "field": "deliverable_account_hash",
+        "policy_name": "activity-deliverable-policy",
+        "target_field": "Deliverable Join",
+        "ignore_missing": true
+      }
+    },
+    {
+      "enrich": {
+        "field": "opportunity_account_hash",
+        "policy_name": "activity-opportunity-policy",
+        "target_field": "Opportunity Join",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "_id",
+        "copy_from": "Hero Activity Number"
+      }
+    },
+    {
+      "set": {
+        "field": "_index",
+        "value": "activities"
+      }
+    },
+    {
+      "set": {
+        "field": "sa_names",
+        "copy_from": "Created By"
+      }
+    },
+    {
+      "remove": {
+        "field": [
+          "message",
+          "agent",
+          "ecs",
+          "host",
+          "input",
+          "log"
+        ],
+        "ignore_missing": true
+      }
+    }
+  ]
+}
+
+PUT _ingest/pipeline/deliverables-pipeline
+{
+  "description": "Ingest pipeline created by text structure finder",
+  "processors": [
+    {
+      "csv": {
+        "field": "message",
+        "target_fields": [
+          "Deliverable Number",
+          "Name",
+          "Status",
+          "Type",
+          "Hours",
+          "Scheduled Date",
+          "Account",
+          "Opportunity",
+          "Record ID",
+          "Owner",
+          "Deleted",
+          "Currency ISO Code",
+          "Created Date",
+          "Created By",
+          "Last Modified Date",
+          "Last Modified By",
+          "System Modstamp",
+          "Last Viewed Date",
+          "Last Referenced Date",
+          "Completed Date",
+          "Completed Presales Stage",
+          "Completed Stage",
+          "Deliverable Flag",
+          "Description",
+          "Due Date",
+          "Parent TMR",
+          "Scheduled to completed days",
+          "Started Date",
+          "Started to completed days",
+          "Deliverable Created By Workday ID",
+          "Deliverable Owner Workday ID"
+        ],
+        "ignore_missing": false
+      }
+    },
+    {
+      "convert": {
+        "field": "Deliverable Created By Workday ID",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Deliverable Flag",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Deliverable Owner Workday ID",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Hours",
+        "type": "double",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Scheduled to completed days",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Started to completed days",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Started Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Due Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Created Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Scheduled Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Completed Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Modified Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Referenced Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Viewed Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "System Modstamp",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Completed",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "Started Date",
+        "copy_from": "Created Date",
+        "if": "ctx?.Date == null || ctx?.Date?.isEmpty()"
+      }
+    },
+    {
+      "date": {
+        "field": "Created Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Created Date"
+      }
+    },
+    {
+      "date": {
+        "field": "Due Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Due Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Started Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Started Date"
+      }
+    },
+    {
+      "date": {
+        "field": "Completed Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Completed Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Scheduled Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Scheduled Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Modified Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Modified Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Referenced Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Referenced Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Viewed Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Viewed Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "System Modstamp",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "System Modstamp",
+        "ignore_failure": true
+      }
+    },
+    {
+      "remove": {
+        "field": "message",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "_id",
+        "copy_from": "Deliverable Number"
+      }
+    },
+    {
+      "set": {
+        "field": "_index",
+        "value": "deliverables"
+      }
+    },
+    {
+      "fingerprint": {
+        "fields": [
+          "Name",
+          "Account"
+        ],
+        "target_field": "deliverable_account_hash",
+        "method": "MD5",
+        "ignore_missing": true
+      }
+    }
+  ]
+}
+PUT _ingest/pipeline/opportunities-pipeline
+{
+  "description": "Ingest pipeline created by text structure finder",
+  "processors": [
+    {
+      "csv": {
+        "field": "message",
+        "target_fields": [
+          "Opportunity Name",
+          "Account",
+          "Owner",
+          "Close Date",
+          "Stage",
+          "Forecast Category",
+          "Hero Score",
+          "Opportunity ID",
+          "Deleted",
+          "Record Type",
+          "Private",
+          "Description",
+          "Amount",
+          "Probability (%)",
+          "Expected Amount",
+          "Opportunity Type",
+          "Next Step",
+          "Lead Source",
+          "Closed",
+          "Won",
+          "Opportunity Currency",
+          "Campaign",
+          "Has Line Item",
+          "Is Split",
+          "Price Book",
+          "Territory",
+          "Exclude from the territory assignment filter logic",
+          "Created Date",
+          "Created By",
+          "Last Modified Date",
+          "Last Modified By",
+          "System Modstamp",
+          "Last Activity",
+          "Fiscal Quarter",
+          "Fiscal Year",
+          "Fiscal Period",
+          "Last Viewed Date",
+          "Last Referenced Date",
+          "Has Open Activity",
+          "Has Overdue Task",
+          "Balance",
+          "Contract Amount",
+          "Can Revive?",
+          "Total Discount Amount",
+          "Date Revived",
+          "ACV Upsell/Attrition",
+          "TCV Amount",
+          "Greatest Opp Line Amount",
+          "ARR Amount",
+          "Net Amount",
+          "Hero Opportunity Flag",
+          "Presales Concern",
+          "Presales Stage",
+          "Technical Differentiation",
+          "New & Upsell Amount",
+          "Base Renewal Amount",
+          "Expansion ACV",
+          "Renewal MY",
+          "Renewed Subscription Amount (Renewal)",
+          "Total Partner Uplift Amount",
+          "RM Forecast",
+          "PO Amount (01)",
+          "PO Amount (02)",
+          "PO Amount (03)",
+          "PO Amount (04)",
+          "PO Amount (05)",
+          "PO Amount Total",
+          "My Geolocation (Latitude)",
+          "My Geolocation (Longitude)",
+          "SA Manager Qualification",
+          "SA Manager Comments"
+        ],
+        "ignore_missing": false
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Close Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Created Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Activity",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Modified Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Referenced Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "Last Viewed Date",
+        "ignore_missing": true
+      }
+    },
+    {
+      "uppercase": {
+        "field": "System Modstamp",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "Close Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Close Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Created Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Created Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Activity",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Activity",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Modified Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Modified Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Referenced Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Referenced Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "Last Viewed Date",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "Last Viewed Date",
+        "ignore_failure": true
+      }
+    },
+    {
+      "date": {
+        "field": "System Modstamp",
+        "formats": [
+          "MM/dd/yyyy",
+          "MM/dd/yyyy h:mm a"
+        ],
+        "target_field": "System Modstamp",
+        "ignore_failure": true
+      }
+    },
+    {
+      "rename": {
+        "field": "New & Upsell Amount",
+        "target_field": "New And Upsell Amount",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "Probability (%)",
+        "target_field": "Probability",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Expansion ACV",
+        "pattern": "USD %{Expansion ACV}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Expansion ACV",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Expansion ACV",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "ARR Amount",
+        "pattern": "USD %{ARR Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "ARR Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "ARR Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Amount",
+        "pattern": "USD %{Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Base Renewal Amount",
+        "pattern": "USD %{Base Renewal Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Base Renewal Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Base Renewal Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Expected Amount",
+        "pattern": "USD %{Expected Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Expected Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Expected Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Greatest Opp Line Amount",
+        "pattern": "USD %{Greatest Opp Line Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Greatest Opp Line Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Greatest Opp Line Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Net Amount",
+        "pattern": "USD %{Net Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Net Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Net Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "New And Upsell Amount",
+        "pattern": "USD %{New And Upsell Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "New And Upsell Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "New And Upsell Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "PO Amount (01)",
+        "pattern": "USD %{PO Amount (01)}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "PO Amount (01)",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "PO Amount (01)",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "PO Amount (02)",
+        "pattern": "USD %{PO Amount (02)}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "PO Amount (02)",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "PO Amount (02)",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "PO Amount Total",
+        "pattern": "USD %{PO Amount Total}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "PO Amount Total",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "PO Amount Total",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Renewal MY",
+        "pattern": "USD %{Renewal MY}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Renewal MY",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Renewal",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Renewed Subscription Amount (Renewal)",
+        "pattern": "USD %{Renewed Subscription Amount (Renewal)}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Renewed Subscription Amount (Renewal)",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Renewed Subscription Amount (Renewal)",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "TCV Amount",
+        "pattern": "USD %{TCV Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "TCV Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "TCV Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Total Discount Amount",
+        "pattern": "USD %{Total Discount Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Total Discount Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Total Discount Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Total Partner Uplift Amount",
+        "pattern": "USD %{Total Partner Uplift Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Total Partner Uplift Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Total Partner Uplift Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Contract Amount",
+        "pattern": "USD %{Contract Amount}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "Contract Amount",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Contract Amount",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
+        "field": "Probability",
+        "pattern": "%{Probability}%",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Probability",
+        "type": "float"
+      }
+    },
+    {
+      "script": {
+        "source": "ctx.Probability = ctx.Probability/100"
+      }
+    },
+    {
+      "convert": {
+        "field": "Hero Opportunity Flag",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "Hero Score",
+        "type": "long",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "_id",
+        "copy_from": "Opportunity ID"
+      }
+    },
+    {
+      "remove": {
+        "field": [
+          "message",
+          "ecs",
+          "logs",
+          "input",
+          "agent",
+          "host",
+          "log"
+        ],
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "_index",
+        "value": "opportunities"
+      }
+    },
+    {
+      "fingerprint": {
+        "fields": [
+          "Opportunity Name",
+          "Account"
+        ],
+        "target_field": "opportunity_account_hash",
+        "method": "MD5",
+        "ignore_missing": true
+      }
+    }
+  ]
+}

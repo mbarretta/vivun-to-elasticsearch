@@ -1,0 +1,8 @@
+.gradle
+.idea
+
+# Ignore Gradle build output directory
+build
+
+app/src/test/resources/test-settings.yml
+app/settings.yml

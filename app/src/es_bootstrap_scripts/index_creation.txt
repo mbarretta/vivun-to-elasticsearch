@@ -1,0 +1,508 @@
+PUT opportunities
+{
+  "settings": {
+    "index.default_pipeline": "opportunities-pipeline"
+  },
+  "mappings": {
+    "properties": {
+      "opportunity_account_hash": {
+        "type": "keyword"
+      },
+      "ACV Upsell/Attrition": {
+        "type": "keyword"
+      },
+      "ARR Amount": {
+        "type": "float"
+      },
+      "Account": {
+        "type": "keyword"
+      },
+      "Amount": {
+        "type": "float"
+      },
+      "Base Renewal Amount": {
+        "type": "float"
+      },
+      "Campaign": {
+        "type": "text"
+      },
+      "Can Revive?": {
+        "type": "keyword"
+      },
+      "Close Date": {
+        "type": "date"
+      },
+      "Closed": {
+        "type": "keyword"
+      },
+      "Contract Amount": {
+        "type": "float"
+      },
+      "Created By": {
+        "type": "keyword"
+      },
+      "Created Date": {
+        "type": "date"
+      },
+      "Deleted": {
+        "type": "keyword"
+      },
+      "Description": {
+        "type": "text"
+      },
+      "Exclude from the territory assignment filter logic": {
+        "type": "keyword"
+      },
+      "Expansion ACV": {
+        "type": "float"
+      },
+      "Expected Amount": {
+        "type": "float"
+      },
+      "Fiscal Period": {
+        "type": "keyword"
+      },
+      "Fiscal Quarter": {
+        "type": "keyword"
+      },
+      "Fiscal Year": {
+        "type": "keyword"
+      },
+      "Forecast Category": {
+        "type": "keyword"
+      },
+      "Greatest Opp Line Amount": {
+        "type": "float"
+      },
+      "Has Line Item": {
+        "type": "keyword"
+      },
+      "Has Open Activity": {
+        "type": "keyword"
+      },
+      "Has Overdue Task": {
+        "type": "keyword"
+      },
+      "Hero Opportunity Flag": {
+        "type": "long"
+      },
+      "Hero Score": {
+        "type": "long"
+      },
+      "Is Split": {
+        "type": "keyword"
+      },
+      "Last Activity": {
+        "type": "date"
+      },
+      "Last Modified By": {
+        "type": "keyword"
+      },
+      "Last Modified Date": {
+        "type": "date"
+      },
+      "Last Referenced Date": {
+        "type": "date"
+      },
+      "Last Viewed Date": {
+        "type": "date"
+      },
+      "Lead Source": {
+        "type": "keyword"
+      },
+      "Net Amount": {
+        "type": "float"
+      },
+      "New And Upsell Amount": {
+        "type": "double"
+      },
+      "Opportunity Currency": {
+        "type": "keyword"
+      },
+      "Opportunity ID": {
+        "type": "keyword"
+      },
+      "Opportunity Name": {
+        "type": "keyword"
+      },
+      "Opportunity Type": {
+        "type": "keyword"
+      },
+      "Owner": {
+        "type": "keyword"
+      },
+      "PO Amount (01)": {
+        "type": "float"
+      },
+      "PO Amount (02)": {
+        "type": "float"
+      },
+      "PO Amount Total": {
+        "type": "float"
+      },
+      "Presales Concern": {
+        "type": "keyword"
+      },
+      "Presales Stage": {
+        "type": "keyword"
+      },
+      "Price Book": {
+        "type": "keyword"
+      },
+      "Private": {
+        "type": "keyword"
+      },
+      "Probability": {
+        "type": "float"
+      },
+      "Record Type": {
+        "type": "keyword"
+      },
+      "Renewal MY": {
+        "type": "float"
+      },
+      "Renewed Subscription Amount (Renewal)": {
+        "type": "float"
+      },
+      "SA Manager Comments": {
+        "type": "text"
+      },
+      "SA Manager Qualification": {
+        "type": "text"
+      },
+      "Stage": {
+        "type": "keyword"
+      },
+      "System Modstamp": {
+        "type": "date"
+      },
+      "TCV Amount": {
+        "type": "float"
+      },
+      "Technical Differentiation": {
+        "type": "keyword"
+      },
+      "Total Discount Amount": {
+        "type": "float"
+      },
+      "Total Partner Uplift Amount": {
+        "type": "float"
+      },
+      "Won": {
+        "type": "keyword"
+      },
+      "enrich": {
+        "properties": {
+          "sa_detail": {
+            "type": "nested",
+            "properties": {
+              "activity_count": {
+                "type": "long"
+              },
+              "activity_percentage": {
+                "type": "long"
+              },
+              "adjusted_amount": {
+                "type": "float"
+              },
+              "adjusted_new_expansion": {
+                "type": "float"
+              },
+              "name": {
+                "type": "keyword"
+              }
+            }
+          },
+          "sa_count": {
+            "type": "long"
+          },
+          "activity_count": {
+            "type": "long"
+          }
+        }
+      },
+      "sa_names": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+PUT activities
+{
+  "settings": {
+    "index.default_pipeline": "activities-pipeline"
+  },
+  "mappings": {
+    "properties": {
+      "sa_names": {
+        "type": "keyword"
+      },
+      "deliverable_account_hash": {
+        "type": "keyword"
+      },
+      "opportunity_account_hash": {
+        "type": "keyword"
+      },
+      "Account": {
+        "type": "text"
+      },
+      "Created By": {
+        "type": "keyword"
+      },
+      "Created Date": {
+        "type": "date"
+      },
+      "Created Stage": {
+        "type": "keyword"
+      },
+      "Date": {
+        "type": "date"
+      },
+      "Default Hours": {
+        "type": "long"
+      },
+      "Deleted": {
+        "type": "keyword"
+      },
+      "Deliverable": {
+        "type": "text"
+      },
+      "Deliverable Join": {
+        "properties": {
+          "Deliverable Number": {
+            "type": "keyword"
+          },
+          "Type": {
+            "type": "keyword"
+          },
+          "deliverable_account_hash": {
+            "type": "keyword"
+          }
+        }
+      },
+      "Description": {
+        "type": "text"
+      },
+      "Focus": {
+        "type": "keyword"
+      },
+      "Hero Activity Flag": {
+        "type": "long"
+      },
+      "Hero Activity Number": {
+        "type": "keyword"
+      },
+      "Hours": {
+        "type": "double"
+      },
+      "Last Modified By": {
+        "type": "keyword"
+      },
+      "Last Modified Date": {
+        "type": "date"
+      },
+      "Last Referenced Date": {
+        "type": "date"
+      },
+      "Last Viewed Date": {
+        "type": "date"
+      },
+      "Opportunity": {
+        "type": "keyword"
+      },
+      "Opportunity Join": {
+        "properties": {
+          "Account": {
+            "type": "keyword"
+          },
+          "Amount": {
+            "type": "float"
+          },
+          "Close Date": {
+            "type": "date"
+          },
+          "Closed": {
+            "type": "keyword"
+          },
+          "Created Date": {
+            "type": "date"
+          },
+          "Fiscal Quarter": {
+            "type": "keyword"
+          },
+          "Fiscal Year": {
+            "type": "keyword"
+          },
+          "Last Modified Date": {
+            "type": "date"
+          },
+          "Opportunity ID": {
+            "type": "keyword"
+          },
+          "Owner": {
+            "type": "keyword"
+          },
+          "Record Type": {
+            "type": "keyword"
+          },
+          "Stage": {
+            "type": "keyword"
+          },
+          "Won": {
+            "type": "keyword"
+          },
+         "opportunity_account_hash": {
+           "type": "keyword"
+         }
+        }
+      },
+      "Owner": {
+        "type": "keyword"
+      },
+      "Source": {
+        "type": "keyword"
+      },
+      "Status": {
+        "type": "keyword"
+      },
+      "Type": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+PUT deliverables
+{
+   "settings": {
+     "index.default_pipeline": "deliverables-pipeline"
+   },
+   "mappings": {
+     "properties": {
+       "deliverable_account_hash": {
+         "type": "keyword"
+       },
+       "Account": {
+         "type": "text"
+       },
+       "Completed Date": {
+         "type": "date"
+       },
+       "Completed Stage": {
+         "type": "keyword"
+       },
+       "Created By": {
+         "type": "keyword"
+       },
+       "Created Date": {
+         "type": "date"
+       },
+       "Currency ISO Code": {
+         "type": "keyword"
+       },
+       "Deleted": {
+         "type": "keyword"
+       },
+       "Deliverable Created By Workday ID": {
+         "type": "long"
+       },
+       "Deliverable Flag": {
+         "type": "long"
+       },
+       "Deliverable Number": {
+         "type": "keyword"
+       },
+       "Deliverable Owner Workday ID": {
+         "type": "long"
+       },
+       "Description": {
+         "type": "text"
+       },
+       "Due Date": {
+         "type": "date"
+       },
+       "Hours": {
+         "type": "double"
+       },
+       "Last Modified By": {
+         "type": "keyword"
+       },
+       "Last Modified Date": {
+         "type": "date"
+       },
+       "Last Referenced Date": {
+         "type": "date"
+       },
+       "Last Viewed Date": {
+         "type": "date"
+       },
+       "Name": {
+         "type": "text"
+       },
+       "Opportunity": {
+         "type": "text"
+       },
+       "Owner": {
+         "type": "keyword"
+       },
+       "Parent TMR": {
+         "type": "text",
+         "fields": {
+           "keyword": {
+             "type": "keyword",
+             "ignore_above": 256
+           }
+         }
+       },
+       "Record ID": {
+         "type": "keyword"
+       },
+       "Scheduled Date": {
+         "type": "date"
+       },
+       "Scheduled to completed days": {
+         "type": "long"
+       },
+       "Started Date": {
+         "type": "date"
+       },
+       "Started to completed days": {
+         "type": "long"
+       },
+       "Status": {
+         "type": "keyword"
+       },
+       "System Modstamp": {
+         "type": "date"
+       },
+       "Type": {
+         "type": "keyword"
+       },
+       "enrich": {
+         "properties": {
+           "sa_count": {
+             "type": "long"
+           },
+           "activity_count": {
+             "type": "long"
+           },
+           "sa_activities": {
+             "type": "nested",
+             "properties": {
+               "name": {
+                 "type": "keyword"
+               },
+               "activity_count": {
+                 "type": "long"
+               },
+               "activity_percentage": {
+                 "type": "float"
+               }
+             }
+           }
+         }
+       }
+     }
+   }
+ }

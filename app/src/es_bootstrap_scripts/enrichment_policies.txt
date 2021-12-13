@@ -1,0 +1,41 @@
+PUT /_enrich/policy/activity-opportunity-policy
+{
+    "match" : {
+      "indices" : [
+        "opportunities"
+      ],
+      "match_field" : "opportunity_account_hash",
+      "enrich_fields" : [
+        "Account",
+        "Amount",
+        "Close Date",
+        "Closed",
+        "Created Date",
+        "Fiscal Year",
+        "Fiscal Quarter",
+        "Last Modified Date",
+        "New and Upsell Amount",
+        "Opportunity ID",
+        "Owner",
+        "Record Type",
+        "Stage",
+        "Won"
+      ]
+    }
+}
+PUT /_enrich/policy/activity-opportunity-policy/_execute
+
+PUT /_enrich/policy/activity-deliverable-policy
+{
+    "match" : {
+      "indices" : [
+        "deliverables"
+      ],
+      "match_field" : "deliverable_account_hash",
+      "enrich_fields" : [
+        "Deliverable Number",
+        "Type"
+      ]
+    }
+}
+PUT /_enrich/policy/activity-deliverable-policy/_execute
