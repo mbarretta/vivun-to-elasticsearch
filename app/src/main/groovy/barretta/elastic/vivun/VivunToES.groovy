@@ -1,8 +1,10 @@
 package barretta.elastic.vivun
 
+import barretta.elastic.vivun.objects.Opportunity
 import groovy.cli.picocli.CliBuilder
 import groovy.util.logging.Slf4j
 import groovy.yaml.YamlSlurper
+import org.elasticsearch.search.SearchHit
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
 
@@ -52,24 +54,51 @@ class VivunToES {
 
         log.info("fetching deliverables...")
         def deliverables = FetchFromVivun.deliverables(config)
-        SendToES.bulkInsert(config.es.client, deliverables, config.es.indices.deliverables)
-        SendToES.reExecuteEnrichPolicy(config.es.client, config.es.enrichPolicies.deliverables)
+        ESClientUtils.bulkInsertCsv(config.es.client, deliverables, config.es.indices.deliverables)
+        ESClientUtils.reExecuteEnrichPolicy(config.es.client, config.es.enrichPolicies.deliverables)
         log.debug("done")
 
         log.info("fetching opportunities...")
-        def opportunities = FetchFromVivun.opportunities(config)
-        SendToES.bulkInsert(config.es.client, opportunities, config.es.indices.opportunities)
-        SendToES.reExecuteEnrichPolicy(config.es.client, config.es.enrichPolicies.opportunities)
+
+        //somewhat complex dance to commence that will fetch all opps from ES, add in the newly created opps from Vivun, and merge
+        //(use the newer Vivun version) updates
+        def allOpportunities = []
+        def existingOpportunities = ESClientUtils.fetchOpportunities(config.es.client, config.es.indices.opportunities)
+
+        //grab new and updated opps from Vivun. When doing a "fetch since", we only want the new and update opps, and there might be none of either
+        def vivunOpportunities = FetchFromVivun.opportunities(config)
+        if (config.fetchSince) {
+            def newAndModifiedOpportunities = vivunOpportunities.split { it.isNew() }
+            if (newAndModifiedOpportunities[0].size() > 0) {
+                ESClientUtils.bulkInsertCsv(config.es.client, newAndModifiedOpportunities[0], config.es.indices.opportunities)
+                allOpportunities += newAndModifiedOpportunities[0]
+            }
+            if (newAndModifiedOpportunities[1].size() > 1) {
+                ESClientUtils.bulkUpdate(config.es.client, newAndModifiedOpportunities[1], config.es.indices.opportunities)
+                allOpportunities += newAndModifiedOpportunities[1]
+
+                //remove the matching ES opp record so that the resulting "all" list won't have the old data
+                def updatedIds = newAndModifiedOpportunities[1].collect { it.opportunityId }
+                existingOpportunities.removeAll { updatedIds.contains(it.opportunityId) }
+            }
+            allOpportunities += existingOpportunities //have to wait to do this until after we've removed updates in the line above
+        } else {
+            ESClientUtils.bulkInsertCsv(config.es.client, vivunOpportunities, config.es.indices.opportunities)
+            allOpportunities += vivunOpportunities
+        }
+
+        //grab existing opps from Elasticsearch and merge them in with the new/modified ones from vivun
+        ESClientUtils.reExecuteEnrichPolicy(config.es.client, config.es.enrichPolicies.opportunities)
         log.debug("done")
 
         log.info("fetching activities...")
         def activities = FetchFromVivun.activities(config)
-        SendToES.bulkInsert(config.es.client, activities, config.es.indices.activities)
+        ESClientUtils.bulkInsertCsv(config.es.client, activities, config.es.indices.activities)
         log.debug("done")
 
         log.info("running additional analytics...")
-        def additionalAnalytics = VivunAnalytics.run(config, activities, opportunities, deliverables)
-        SendToES.bulk(config.es.client, additionalAnalytics)
+        def additionalAnalytics = VivunAnalytics.run(config, activities, allOpportunities, deliverables)
+        ESClientUtils.bulk(config.es.client, additionalAnalytics)
         log.debug("done")
 
         config.fetchSince = LocalDate.now().format("yyyy-MM-dd")
@@ -77,6 +106,12 @@ class VivunToES {
 
         Thread.sleep(10000) // seems needed to prevent exit before the async ES bulk load finishes
         System.exit(0)
+    }
+
+    private static def findNewOpportunities(List<SearchHit> esOpps, List<Opportunity> vivunOpps) {
+        def esOppsIds = esOpps.collect { SearchHit it -> it.id }
+        vivunOpps.removeAll {esOppsIds.contains(it.opportunityId) }
+        return vivunOpps
     }
 
     private static def saveConfig(ConfigObject config) {

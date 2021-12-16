@@ -1,11 +1,11 @@
-package barretta.elastic
+package barretta.elastic.vivun
 
-import barretta.elastic.vivun.SendToES
+
 import com.barretta.elastic.clients.ESClient
 import groovy.yaml.YamlSlurper
 import spock.lang.Specification
 
-class SendToESTest extends Specification {
+class ESClientUtilsSpec extends Specification {
     def csv
     def config
     ESClient esClient
@@ -14,16 +14,21 @@ class SendToESTest extends Specification {
         csv = ['"header 1","header 2","header 3"','"cell 1","cell 2","cell 3"']
 //        csv = ["asdf","asdf"]
         config = new YamlSlurper().parse(GroovyClassLoader.getSystemResource('test-settings.yml').openStream())
-        esClient = new ESClient(config.es as ESClient.Config)
+        esClient = new ESClient(config.es.client as ESClient.Config)
     }
 
     void cleanup() {
 
     }
+    def "fetching opportunities works"() {
+       when:
+       def opps = ESClientUtils.fetchOpportunities(config, config.es.indices.opportunities)
+
+    }
 
     def "Send"() {
         when:
-        SendToES.bulkInsert(config, csv, "test")
+        ESClientUtils.bulkInsertCsv(config, csv, "test")
 
         then:
         assert true

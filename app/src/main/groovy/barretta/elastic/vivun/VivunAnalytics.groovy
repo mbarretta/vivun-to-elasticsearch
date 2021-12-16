@@ -70,6 +70,7 @@ class VivunAnalytics {
 
             //get total activity count to allow us to calculate fractional SA contribution and money
             def totalActivityCount = matchingActivities.size()
+            def totalActivityHours = matchingActivities.sum { it.hours }
 
             if (totalActivityCount > 0) {
                 //isolate SAs
@@ -81,6 +82,7 @@ class VivunAnalytics {
                         list << [
                             name                  : it.key,
                             activity_count        : it.value.size(),
+                            activity_hours        : it.value.sum {it.hours },
                             activity_percentage   : percentage,
                             adjusted_amount       : percentage * opportunity.amount,
                             adjusted_new_expansion: percentage * opportunity.newAndUpsellAmount
@@ -96,6 +98,7 @@ class VivunAnalytics {
                     enrich: [
                         sa_count      : saActivitiesEnriched.size(),
                         activity_count: totalActivityCount,
+                        activity_hours: totalActivityHours,
                         sa_detail     : saActivitiesEnriched
                     ],
                     sa_names: saActivities.keySet()

@@ -1,6 +1,6 @@
 package barretta.elastic.vivun.objects
 
-class Activity extends VivunCsvObject {
+class Activity extends VivunObject {
 
     Activity(String[] data) {
         super.dataArray = data
@@ -12,7 +12,7 @@ class Activity extends VivunCsvObject {
     def getType() { return dataArray[3] }
     def getDescription() { return dataArray[4] }
     def getData() { return dataArray[5] }
-    def getHours() { return dataArray[6] as int }
+    def getHours() { return toNum(dataArray[6]) }
     def getDeliverable() { return dataArray[7] }
     def getDeleted() { return dataArray[8] }
     def getCreatedDate() { return dataArray[9] }

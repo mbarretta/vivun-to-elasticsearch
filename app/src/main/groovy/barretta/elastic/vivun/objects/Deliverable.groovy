@@ -1,6 +1,6 @@
 package barretta.elastic.vivun.objects
 
-class Deliverable extends VivunCsvObject {
+class Deliverable extends VivunObject {
 
     Deliverable(String[] data) {
         super.dataArray = data
