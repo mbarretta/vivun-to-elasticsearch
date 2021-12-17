@@ -11,15 +11,45 @@ class VivunAnalytics {
     static def run(Map config, List<Activity> activities, List<Opportunity> opportunities, List<Deliverable> deliverables) {
         def opptyUpdates = doSAToOpportunityAnalytics(config, activities, opportunities)
         def deliverableUpdates = doActivitiesToDeliverables(config, activities, deliverables)
+        def activityUpdates = doOpportunitiesToActivities(config, opportunities, activities)
 
         //this will need to expand to merge inserts/deletes if enrich methods create those
         def returnBulkData = [:]
-        returnBulkData[ESClient.BulkOps.UPDATE] = opptyUpdates[ESClient.BulkOps.UPDATE] + deliverableUpdates[ESClient.BulkOps.UPDATE]
+        returnBulkData[ESClient.BulkOps.UPDATE] = opptyUpdates[ESClient.BulkOps.UPDATE] +
+            deliverableUpdates[ESClient.BulkOps.UPDATE] +
+            activityUpdates[ESClient.BulkOps.UPDATE]
         return returnBulkData
     }
 
+    static def doOpportunitiesToActivities(Map config, List<Opportunity> opportunities, List<Activity> activities) {
+        log.info("joining opportunities to activities")
+        def updates = activities.groupBy { it.opportunityAccountHash }.inject([]) { list, group ->
+            def matchingOpp = opportunities.find { opp -> group.key == opp.opportunityAccountHash }
+            if (matchingOpp) {
+                def totalOppHours = group.value.sum { it.hours } as float
+                group.value.each {
+                    def hoursPercentage = it.hours / totalOppHours
+                    list << [
+                        _id   : it.heroActivityNumber,
+                        _index: config.es.indices.activities,
+                        enrich: [
+                            hours_opp_percentage : hoursPercentage.round(2),
+                            opp_id               : matchingOpp.opportunityId,
+                            opp_amount           : matchingOpp?.amount ?: 0,
+                            opp_neAmount         : matchingOpp?.newAndUpsellAmount ?: 0,
+                            opp_amount_adjusted  : ((matchingOpp?.amount ?: 0.0) * hoursPercentage).round(2),
+                            opp_neAmount_adjusted: ((matchingOpp?.newAndUpsellAmount ?: 0.0) * hoursPercentage).round(2)
+                        ]
+                    ]
+                }
+            }
+            return list
+        }
+        return [(ESClient.BulkOps.UPDATE): updates]
+    }
+
     static def doActivitiesToDeliverables(Map config, List<Activity> activities, List<Deliverable> deliverables) {
-        log.info("joining SA activities to deliverables")
+        log.info("joining activities to deliverables")
 
         def updates = deliverables.inject([:].withDefault { [] }) { updateMap, deliverable ->
             def matchingActivities = activities.findAll {
@@ -62,7 +92,7 @@ class VivunAnalytics {
      * add SA info to opportunity records by way of activities
      */
     static def doSAToOpportunityAnalytics(Map config, List<Activity> activities, List<Opportunity> opportunities) {
-        log.info("joining SA activities to opportunities")
+        log.info("joining activities to opportunities")
         def updates = opportunities.inject([:].withDefault { [] }) { updateMap, opportunity ->
             def matchingActivities = activities.findAll {
                 it.opportunity == opportunity.opportunityName && it.account == opportunity.account
@@ -82,7 +112,7 @@ class VivunAnalytics {
                         list << [
                             name                  : it.key,
                             activity_count        : it.value.size(),
-                            activity_hours        : it.value.sum {it.hours },
+                            activity_hours        : it.value.sum { it.hours },
                             activity_percentage   : percentage,
                             adjusted_amount       : percentage * opportunity.amount,
                             adjusted_new_expansion: percentage * opportunity.newAndUpsellAmount
@@ -93,9 +123,9 @@ class VivunAnalytics {
 
                 //create opportunity update record w/ SA field
                 updateMap[ESClient.BulkOps.UPDATE] << [
-                    _id   : opportunity.opportunityId, // our key
-                    _index: config.es.indices.opportunities,
-                    enrich: [
+                    _id     : opportunity.opportunityId, // our key
+                    _index  : config.es.indices.opportunities,
+                    enrich  : [
                         sa_count      : saActivitiesEnriched.size(),
                         activity_count: totalActivityCount,
                         activity_hours: totalActivityHours,

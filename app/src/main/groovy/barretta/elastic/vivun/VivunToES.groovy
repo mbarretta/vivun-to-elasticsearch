@@ -59,35 +59,7 @@ class VivunToES {
         log.debug("done")
 
         log.info("fetching opportunities...")
-
-        //somewhat complex dance to commence that will fetch all opps from ES, add in the newly created opps from Vivun, and merge
-        //(use the newer Vivun version) updates
-        def allOpportunities = []
-        def existingOpportunities = ESClientUtils.fetchOpportunities(config.es.client, config.es.indices.opportunities)
-
-        //grab new and updated opps from Vivun. When doing a "fetch since", we only want the new and update opps, and there might be none of either
-        def vivunOpportunities = FetchFromVivun.opportunities(config)
-        if (config.fetchSince) {
-            def newAndModifiedOpportunities = vivunOpportunities.split { it.isNew() }
-            if (newAndModifiedOpportunities[0].size() > 0) {
-                ESClientUtils.bulkInsertCsv(config.es.client, newAndModifiedOpportunities[0], config.es.indices.opportunities)
-                allOpportunities += newAndModifiedOpportunities[0]
-            }
-            if (newAndModifiedOpportunities[1].size() > 1) {
-                ESClientUtils.bulkUpdate(config.es.client, newAndModifiedOpportunities[1], config.es.indices.opportunities)
-                allOpportunities += newAndModifiedOpportunities[1]
-
-                //remove the matching ES opp record so that the resulting "all" list won't have the old data
-                def updatedIds = newAndModifiedOpportunities[1].collect { it.opportunityId }
-                existingOpportunities.removeAll { updatedIds.contains(it.opportunityId) }
-            }
-            allOpportunities += existingOpportunities //have to wait to do this until after we've removed updates in the line above
-        } else {
-            ESClientUtils.bulkInsertCsv(config.es.client, vivunOpportunities, config.es.indices.opportunities)
-            allOpportunities += vivunOpportunities
-        }
-
-        //grab existing opps from Elasticsearch and merge them in with the new/modified ones from vivun
+        def allOpportunities = runOpportunityFetchLogic()
         ESClientUtils.reExecuteEnrichPolicy(config.es.client, config.es.enrichPolicies.opportunities)
         log.debug("done")
 
@@ -108,10 +80,34 @@ class VivunToES {
         System.exit(0)
     }
 
-    private static def findNewOpportunities(List<SearchHit> esOpps, List<Opportunity> vivunOpps) {
-        def esOppsIds = esOpps.collect { SearchHit it -> it.id }
-        vivunOpps.removeAll {esOppsIds.contains(it.opportunityId) }
-        return vivunOpps
+    private static def runOpportunityFetchLogic() {
+        //somewhat complex dance to commence that will fetch all opps from ES, add in the newly created opps from Vivun, and merge
+        //(use the newer Vivun version) updates
+        def allOpportunities = []
+
+        //grab new and updated opps from Vivun. When doing a "fetch since", we only want the new and update opps, and there might be none of either
+        def vivunOpportunities = FetchFromVivun.opportunities(config)
+        if (config.fetchSince) {
+            def existingOpportunities = ESClientUtils.fetchOpportunities(config.es.client, config.es.indices.opportunities)
+            def newAndModifiedOpportunities = vivunOpportunities.split { it.isNew() }
+            if (newAndModifiedOpportunities[0].size() > 0) {
+                ESClientUtils.bulkInsertCsv(config.es.client, newAndModifiedOpportunities[0], config.es.indices.opportunities)
+                allOpportunities += newAndModifiedOpportunities[0]
+            }
+            if (newAndModifiedOpportunities[1].size() > 1) {
+                ESClientUtils.bulkUpdate(config.es.client, newAndModifiedOpportunities[1], config.es.indices.opportunities)
+                allOpportunities += newAndModifiedOpportunities[1]
+
+                //remove the matching ES opp record so that the resulting "all" list won't have the old data
+                def updatedIds = newAndModifiedOpportunities[1].collect { it.opportunityId }
+                existingOpportunities.removeAll { updatedIds.contains(it.opportunityId) }
+            }
+            allOpportunities += existingOpportunities //have to wait to do this until after we've removed updates in the line above
+        } else {
+            ESClientUtils.bulkInsertCsv(config.es.client, vivunOpportunities, config.es.indices.opportunities)
+            allOpportunities += vivunOpportunities
+        }
+        return allOpportunities
     }
 
     private static def saveConfig(ConfigObject config) {

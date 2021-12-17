@@ -28,7 +28,8 @@ PUT _ingest/pipeline/activities-pipeline
           "Presales Stage",
           "Source",
           "Status",
-          "Hero Activity Number"
+          "Hero Activity Number",
+          "Record ID"
         ],
         "ignore_missing": false
       }
@@ -487,9 +488,9 @@ PUT _ingest/pipeline/deliverables-pipeline
     }
   ]
 }
+
 PUT _ingest/pipeline/opportunities-pipeline
 {
-  "description": "Ingest pipeline created by text structure finder",
   "processors": [
     {
       "csv": {
@@ -1144,6 +1145,12 @@ PUT _ingest/pipeline/opportunities-pipeline
         "target_field": "opportunity_account_hash",
         "method": "MD5",
         "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "Opportunity",
+        "copy_from": "Opportunity Name"
       }
     }
   ]

@@ -12,7 +12,7 @@ class Activity extends VivunObject {
     def getType() { return dataArray[3] }
     def getDescription() { return dataArray[4] }
     def getData() { return dataArray[5] }
-    def getHours() { return toNum(dataArray[6]) }
+    float getHours() { return (dataArray[6] ?: 0 ) as float }
     def getDeliverable() { return dataArray[7] }
     def getDeleted() { return dataArray[8] }
     def getCreatedDate() { return dataArray[9] }
@@ -29,4 +29,7 @@ class Activity extends VivunObject {
     def getSource() { return dataArray[20] }
     def getStatus() { return dataArray[21] }
     def getHeroActivityNumber() { return dataArray[22] }
+    def getRecordID() { return dataArray[23] }
+
+    def getOpportunityAccountHash() { return (opportunity + account).md5() }
 }

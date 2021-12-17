@@ -274,4 +274,6 @@ class Opportunity extends VivunObject{
     def setSAManagerQualification(q) { dataArray[69] = q}
     def getSAManagerComments() { return dataArray[70] }
     def setSAManagerComments(c) { dataArray[70] = c }
+
+    def getOpportunityAccountHash() { return (opportunityName + account).md5() }
 }

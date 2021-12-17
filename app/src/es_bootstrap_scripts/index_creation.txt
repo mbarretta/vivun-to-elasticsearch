@@ -5,9 +5,6 @@ PUT opportunities
   },
   "mappings": {
     "properties": {
-      "opportunity_account_hash": {
-        "type": "keyword"
-      },
       "ACV Upsell/Attrition": {
         "type": "keyword"
       },
@@ -116,6 +113,9 @@ PUT opportunities
       "New And Upsell Amount": {
         "type": "double"
       },
+      "Opportunity": {
+        "type": "keyword"
+      },
       "Opportunity Currency": {
         "type": "keyword"
       },
@@ -193,11 +193,23 @@ PUT opportunities
       },
       "enrich": {
         "properties": {
+          "activity_count": {
+            "type": "long"
+          },
+          "activity_hours": {
+            "type": "float"
+          },
+          "sa_count": {
+            "type": "long"
+          },
           "sa_detail": {
             "type": "nested",
             "properties": {
               "activity_count": {
                 "type": "long"
+              },
+              "activity_hours": {
+                "type": "float"
               },
               "activity_percentage": {
                 "type": "long"
@@ -212,14 +224,11 @@ PUT opportunities
                 "type": "keyword"
               }
             }
-          },
-          "sa_count": {
-            "type": "long"
-          },
-          "activity_count": {
-            "type": "long"
           }
         }
+      },
+      "opportunity_account_hash": {
+        "type": "keyword"
       },
       "sa_names": {
         "type": "keyword"
@@ -235,17 +244,8 @@ PUT activities
   },
   "mappings": {
     "properties": {
-      "sa_names": {
-        "type": "keyword"
-      },
-      "deliverable_account_hash": {
-        "type": "keyword"
-      },
-      "opportunity_account_hash": {
-        "type": "keyword"
-      },
       "Account": {
-        "type": "text"
+        "type": "keyword"
       },
       "Created By": {
         "type": "keyword"
@@ -352,12 +352,15 @@ PUT activities
           "Won": {
             "type": "keyword"
           },
-         "opportunity_account_hash": {
-           "type": "keyword"
-         }
+          "opportunity_account_hash": {
+            "type": "keyword"
+          }
         }
       },
       "Owner": {
+        "type": "keyword"
+      },
+      "Record ID": {
         "type": "keyword"
       },
       "Source": {
@@ -368,6 +371,37 @@ PUT activities
       },
       "Type": {
         "type": "keyword"
+      },
+      "deliverable_account_hash": {
+        "type": "keyword"
+      },
+      "enrich": {
+        "properties": {
+          "hours_opp_percentage": {
+            "type": "float"
+          },
+          "opp_amount": {
+            "type": "long"
+          },
+          "opp_amount_adjusted": {
+            "type": "float"
+          },
+          "opp_id": {
+            "type": "keyword"
+          },
+          "opp_neAmount": {
+            "type": "long"
+          },
+          "opp_neAmount_adjusted": {
+            "type": "float"
+          }
+        }
+      },
+      "opportunity_account_hash": {
+        "type": "keyword"
+      },
+      "sa_names": {
+        "type": "keyword"
       }
     }
   }
@@ -375,134 +409,134 @@ PUT activities
 
 PUT deliverables
 {
-   "settings": {
-     "index.default_pipeline": "deliverables-pipeline"
-   },
-   "mappings": {
-     "properties": {
-       "deliverable_account_hash": {
-         "type": "keyword"
-       },
-       "Account": {
-         "type": "text"
-       },
-       "Completed Date": {
-         "type": "date"
-       },
-       "Completed Stage": {
-         "type": "keyword"
-       },
-       "Created By": {
-         "type": "keyword"
-       },
-       "Created Date": {
-         "type": "date"
-       },
-       "Currency ISO Code": {
-         "type": "keyword"
-       },
-       "Deleted": {
-         "type": "keyword"
-       },
-       "Deliverable Created By Workday ID": {
-         "type": "long"
-       },
-       "Deliverable Flag": {
-         "type": "long"
-       },
-       "Deliverable Number": {
-         "type": "keyword"
-       },
-       "Deliverable Owner Workday ID": {
-         "type": "long"
-       },
-       "Description": {
-         "type": "text"
-       },
-       "Due Date": {
-         "type": "date"
-       },
-       "Hours": {
-         "type": "double"
-       },
-       "Last Modified By": {
-         "type": "keyword"
-       },
-       "Last Modified Date": {
-         "type": "date"
-       },
-       "Last Referenced Date": {
-         "type": "date"
-       },
-       "Last Viewed Date": {
-         "type": "date"
-       },
-       "Name": {
-         "type": "text"
-       },
-       "Opportunity": {
-         "type": "text"
-       },
-       "Owner": {
-         "type": "keyword"
-       },
-       "Parent TMR": {
-         "type": "text",
-         "fields": {
-           "keyword": {
-             "type": "keyword",
-             "ignore_above": 256
-           }
-         }
-       },
-       "Record ID": {
-         "type": "keyword"
-       },
-       "Scheduled Date": {
-         "type": "date"
-       },
-       "Scheduled to completed days": {
-         "type": "long"
-       },
-       "Started Date": {
-         "type": "date"
-       },
-       "Started to completed days": {
-         "type": "long"
-       },
-       "Status": {
-         "type": "keyword"
-       },
-       "System Modstamp": {
-         "type": "date"
-       },
-       "Type": {
-         "type": "keyword"
-       },
-       "enrich": {
-         "properties": {
-           "sa_count": {
-             "type": "long"
-           },
-           "activity_count": {
-             "type": "long"
-           },
-           "sa_activities": {
-             "type": "nested",
-             "properties": {
-               "name": {
-                 "type": "keyword"
-               },
-               "activity_count": {
-                 "type": "long"
-               },
-               "activity_percentage": {
-                 "type": "float"
-               }
-             }
-           }
-         }
-       }
-     }
-   }
- }
+  "settings": {
+    "index.default_pipeline": "deliverables-pipeline"
+  },
+  "mappings": {
+    "properties": {
+      "deliverable_account_hash": {
+        "type": "keyword"
+      },
+      "Account": {
+        "type": "text"
+      },
+      "Completed Date": {
+        "type": "date"
+      },
+      "Completed Stage": {
+        "type": "keyword"
+      },
+      "Created By": {
+        "type": "keyword"
+      },
+      "Created Date": {
+        "type": "date"
+      },
+      "Currency ISO Code": {
+        "type": "keyword"
+      },
+      "Deleted": {
+        "type": "keyword"
+      },
+      "Deliverable Created By Workday ID": {
+        "type": "long"
+      },
+      "Deliverable Flag": {
+        "type": "long"
+      },
+      "Deliverable Number": {
+        "type": "keyword"
+      },
+      "Deliverable Owner Workday ID": {
+        "type": "long"
+      },
+      "Description": {
+        "type": "text"
+      },
+      "Due Date": {
+        "type": "date"
+      },
+      "Hours": {
+        "type": "double"
+      },
+      "Last Modified By": {
+        "type": "keyword"
+      },
+      "Last Modified Date": {
+        "type": "date"
+      },
+      "Last Referenced Date": {
+        "type": "date"
+      },
+      "Last Viewed Date": {
+        "type": "date"
+      },
+      "Name": {
+        "type": "text"
+      },
+      "Opportunity": {
+        "type": "text"
+      },
+      "Owner": {
+        "type": "keyword"
+      },
+      "Parent TMR": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "Record ID": {
+        "type": "keyword"
+      },
+      "Scheduled Date": {
+        "type": "date"
+      },
+      "Scheduled to completed days": {
+        "type": "long"
+      },
+      "Started Date": {
+        "type": "date"
+      },
+      "Started to completed days": {
+        "type": "long"
+      },
+      "Status": {
+        "type": "keyword"
+      },
+      "System Modstamp": {
+        "type": "date"
+      },
+      "Type": {
+        "type": "keyword"
+      },
+      "enrich": {
+        "properties": {
+          "sa_count": {
+            "type": "long"
+          },
+          "activity_count": {
+            "type": "long"
+          },
+          "sa_activities": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "activity_count": {
+                "type": "long"
+              },
+              "activity_percentage": {
+                "type": "float"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

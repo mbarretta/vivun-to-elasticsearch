@@ -18,7 +18,7 @@ class FetchFromVivun {
     public static List<Activity> activities(config) {
         def requestObj = new JsonBuilder([
             fields          : [
-                "OwnerId", "vh__Account__c", "vh__Opportunity__c", "vh__Type__c", "vh__Description__c", "vh__Date__c", "vh__Hours__c", "vh__Deliverable__c", "IsDeleted", "CreatedDate", "CreatedById", "LastModifiedDate", "LastModifiedById", "LastViewedDate", "LastReferencedDate", "vh__Created_Stage__c", "vh__Default_Hours__c", "vh__Focus__c", "vh__Hero_Activity_Flag__c", "vh__Presales_Stage__c", "vh__Source__c", "vh__Status__c", "Name"
+                "OwnerId", "vh__Account__c", "vh__Opportunity__c", "vh__Type__c", "vh__Description__c", "vh__Date__c", "vh__Hours__c", "vh__Deliverable__c", "IsDeleted", "CreatedDate", "CreatedById", "LastModifiedDate", "LastModifiedById", "LastViewedDate", "LastReferencedDate", "vh__Created_Stage__c", "vh__Default_Hours__c", "vh__Focus__c", "vh__Hero_Activity_Flag__c", "vh__Presales_Stage__c", "vh__Source__c", "vh__Status__c", "Name", "Id"
             ],
             labels          : {},
             query           : '[{"name":"CreatedBy.Name","operator":"in","value":["' + config.names.join('","') + '"]}'+buildDateQuery(config)+']',
