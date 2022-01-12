@@ -204,6 +204,12 @@ PUT _ingest/pipeline/activities-pipeline
         ],
         "ignore_missing": true
       }
+    },
+    {
+        "set": {
+          "field": "search_field",
+          "value": "{{Opportunity}} {{Created By}} {{Account}}"
+        }
     }
   ]
 }
@@ -728,6 +734,28 @@ PUT _ingest/pipeline/opportunities-pipeline
     },
     {
       "dissect": {
+        "field": "ACV Upsell/Attrition",
+        "pattern": "USD %{ACV Upsell Attrition}",
+        "ignore_missing": true
+      }
+    },
+    {
+      "gsub": {
+        "field": "ACV Upsell Attrition",
+        "pattern": ",",
+        "replacement": "",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "ACV Upsell Attrition",
+        "type": "float",
+        "ignore_missing": true
+      }
+    },
+    {
+      "dissect": {
         "field": "ARR Amount",
         "pattern": "USD %{ARR Amount}",
         "ignore_missing": true
@@ -1125,7 +1153,8 @@ PUT _ingest/pipeline/opportunities-pipeline
           "input",
           "agent",
           "host",
-          "log"
+          "log",
+          "ACV Upsell/Attrition"
         ],
         "ignore_missing": true
       }

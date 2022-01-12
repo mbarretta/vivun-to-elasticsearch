@@ -110,8 +110,7 @@ class FetchFromVivun {
     private static def buildDateQuery(config) {
         def dateQuery = ""
         if (config.fetchSince) {
-           dateQuery = ',{"name":"CreatedDate","operator":"gt","value":"'+config.fetchSince+'T00:00:00.000Z"}'+
-               ',{"name":"LastModifiedDate","operator":"gt","value":"'+config.fetchSince+'T00:00:00.000Z"}'
+           dateQuery = ',{"name":"LastModifiedDate","operator":"gt","value":"'+config.fetchSince+'T00:00:00.000Z"}'
         }
         return dateQuery
     }

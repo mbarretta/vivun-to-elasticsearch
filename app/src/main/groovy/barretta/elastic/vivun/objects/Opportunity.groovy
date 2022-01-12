@@ -34,6 +34,7 @@ class Opportunity extends VivunObject{
         setNetAmount(map["Net Amount"])
         setNewAndUpsellAmount(map["New And Upsell Amount"])
         setOpportunityId(map["Opportunity ID"])
+        setOpportunity(map["Opportunity"])
         setOpportunityName(map["Opportunity Name"])
         setOpportunityType(map["Opportunity Type"])
         setOwnerId(map["Owner ID"])
@@ -132,6 +133,8 @@ class Opportunity extends VivunObject{
         return lastModifiedDate && LocalDate.parse(lastModifiedDate[0..9], DateTimeFormatter.ofPattern("MM/dd/yyyy")).equals(created)
     }
 
+    def getOpportunity() { return dataArray[0] }
+    def setOpportunity(o) { dataArray[0] = o }
     def getOpportunityName() { return dataArray[0] }
     def setOpportunityName(name) { dataArray[0] = name}
     def getAccount() { return dataArray[1] }

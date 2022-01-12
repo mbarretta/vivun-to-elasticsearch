@@ -11,11 +11,11 @@ import org.elasticsearch.search.SearchHit
 
 @Slf4j
 class ESClientUtils {
-    static def bulkInsertCsv(Map esClientConfig, List csv, String index) {
+    static def bulkInsertCsv(Map esClientConfig, List<VivunObject> records, String index) {
         def esClient = new ESClient(esClientConfig as ESClient.Config)
 
         //build up obj with `message`=<csv row>
-        def inserts = csv.inject([]) { list, item ->
+        def inserts = records.inject([]) { list, item ->
             list << [message: item.toCsv()]
         }
 
@@ -23,11 +23,16 @@ class ESClientUtils {
         esClient.bulkInsert(inserts, index)
     }
 
-    static def bulkUpdate(Map esClientConfig, List<VivunObject> records, String index) {
+    static def bulkUpdateCsv(Map esClientConfig, List<VivunObject> records, String index) {
         def esClient = new ESClient(esClientConfig as ESClient.Config)
 
+        //build up obj with `message`=<csv row>
+        def updates = records.inject([]) { list, item ->
+            list << [message: item.toCsv()]
+        }
+
         log.debug("Bulk updated to index [$index] with config: $esClient.config")
-        esClient.bulk( [(ESClient.BulkOps.UPDATE): records.collect { it.toMap() }], index )
+        esClient.bulk( [(ESClient.BulkOps.UPDATE): updates], index )
     }
 
     static def bulk(Map esClientConfig, Map<ESClient.BulkOps, List<Map>> records) {
