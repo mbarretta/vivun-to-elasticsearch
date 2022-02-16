@@ -2,21 +2,25 @@ package barretta.elastic.vivun.objects
 
 import org.elasticsearch.search.SearchHit
 
+import java.security.MessageDigest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class Opportunity extends VivunObject{
-    def Opportunity(String[] data) {
+class Opportunity extends VivunObject {
+    def newUpdate = true
+
+    Opportunity(String[] data) {
         super.dataArray = data
     }
 
-    def Opportunity(SearchHit hit) {
+    Opportunity(SearchHit hit) {
         def map = hit.sourceAsMap
+        newUpdate = false
         setAccount(map["Account"])
         setACVUpsellAttrition(map["ACV Upsell Attrition"])
         setAmount(map["Amount"])
         setClosed(map["Closed"])
-        setCloseDate(map["Closed Date"])
+        setCloseDate(map["Close Date"])
         setContractAmount(map["Contract Amount"])
         setCreatedBy(map["Created By"])
         setCreatedDate(map["Created Date"])
@@ -278,5 +282,5 @@ class Opportunity extends VivunObject{
     def getSAManagerComments() { return dataArray[70] }
     def setSAManagerComments(c) { dataArray[70] = c }
 
-    def getOpportunityAccountHash() { return (opportunityName + account).md5() }
+    def getOpportunityAccountHash() { return fingerprint([account, opportunity]) }
 }

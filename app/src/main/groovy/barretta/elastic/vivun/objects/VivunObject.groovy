@@ -1,5 +1,7 @@
 package barretta.elastic.vivun.objects
 
+import java.security.MessageDigest
+
 class VivunObject {
     def dataArray = [""]*70 //haaaaack
 
@@ -19,6 +21,14 @@ class VivunObject {
         return amt.floatValue()
     }
 
+    String fingerprint(fields) {
+        MessageDigest md = MessageDigest.getInstance("MD5")
+        fields.each {
+            md.update(new byte[]{0})
+            md.update((it ?: "").bytes)
+        }
+        return Base64.encoder.encodeToString(md.digest())
+    }
     boolean isNew
     Map toMap
 }

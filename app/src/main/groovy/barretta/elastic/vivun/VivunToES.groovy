@@ -83,24 +83,22 @@ class VivunToES {
         //somewhat complex dance to commence that will fetch all opps from ES and add in the newly created/updated opps from Vivun
         def allOpportunities = []
 
-        //grab new and updated opps from Vivun. When doing a "fetch since", we only want the new and update opps, and there might be none of either
+        //grab new and updated opps from Vivun, wait to save to ES until after the next step
         def vivunOpportunities = FetchFromVivun.opportunities(config)
         allOpportunities += vivunOpportunities
 
-        def existingOpportunities
-
-        //if we did a fetchSince, fetch "the rest" from ES and remove those are contained within the vivun batch
+        //if we did a fetchSince, fetch "the rest" from ES and remove those contained within the vivun batch
+        //this is needed so we have a full set of opps to use for downstream analytics
         if (config.fetchSince) {
-            existingOpportunities = ESClientUtils.fetchOpportunities(config.es.client, config.es.indices.opportunities)
+            def existingOpportunities = ESClientUtils.fetchOpportunities(config.es.client, config.es.indices.opportunities)
 
             //remove the matching ES opp record so that the resulting "all" list won't have the old data
-            def updatedIds = vivunOpportunities.findAll { !it.isNew() }.collect { it.opportunityId }
-
+            def updatedIds = vivunOpportunities.collect { it.opportunityId }
             existingOpportunities.removeAll { updatedIds.contains(it.opportunityId) }
+
             allOpportunities += existingOpportunities
         }
-
-        //now that we have a list of all existing opps from ES that aren't in this new set, we can do the upserts into ES
+        //now we can save the new/updated vivun opps since we've pulled and used the "old" existing ES data
         ESClientUtils.bulkInsertCsv(config.es.client, vivunOpportunities, config.es.indices.opportunities)
 
         return allOpportunities

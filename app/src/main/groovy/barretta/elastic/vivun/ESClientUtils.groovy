@@ -1,9 +1,11 @@
 package barretta.elastic.vivun
 
+import barretta.elastic.vivun.objects.Activity
 import barretta.elastic.vivun.objects.Opportunity
 import barretta.elastic.vivun.objects.VivunObject
 import com.barretta.elastic.clients.ESClient
 import groovy.util.logging.Slf4j
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.enrich.ExecutePolicyRequest
 import org.elasticsearch.index.query.QueryBuilders
@@ -55,6 +57,18 @@ class ESClientUtils {
         log.info("fetching existing opportunities from ES")
         def opps = []
         esClient.scrollQuery(QueryBuilders.matchAllQuery(), 100, { opps << new Opportunity(it as SearchHit) })
+        esClient.close()
         return opps
+    }
+
+    static List<Activity> fetchActivitiesByOpportunity(Map esClientConfig, String index, String opportunityAccountHash) {
+        def config = esClientConfig as ESClient.Config
+        config.index = index
+        def esClient = new ESClient(config)
+        log.debug("fetching existing activities from ES for opp-account hash [$opportunityAccountHash]")
+        SearchResponse response = esClient.termQuery("opportunity_account_hash", opportunityAccountHash, index)
+        List<Activity> activities = response.hits.inject([]) { list, hit -> list << new Activity(hit) }
+        esClient.close()
+        return activities
     }
 }

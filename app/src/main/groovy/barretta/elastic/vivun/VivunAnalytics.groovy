@@ -9,13 +9,13 @@ import groovy.util.logging.Slf4j
 @Slf4j
 class VivunAnalytics {
     static def run(Map config, List<Activity> activities, List<Opportunity> opportunities, List<Deliverable> deliverables) {
-        def opptyUpdates = doSAToOpportunityAnalytics(config, activities, opportunities)
+        def oppUpdates = doSAToOpportunityAnalytics(config, activities, opportunities)
         def deliverableUpdates = doActivitiesToDeliverables(config, activities, deliverables)
         def activityUpdates = doOpportunitiesToActivities(config, opportunities, activities)
 
         //this will need to expand to merge inserts/deletes if enrich methods create those
         def returnBulkData = [:]
-        returnBulkData[ESClient.BulkOps.UPDATE] = opptyUpdates[ESClient.BulkOps.UPDATE] +
+        returnBulkData[ESClient.BulkOps.UPDATE] = oppUpdates[ESClient.BulkOps.UPDATE] +
             deliverableUpdates[ESClient.BulkOps.UPDATE] +
             activityUpdates[ESClient.BulkOps.UPDATE]
         return returnBulkData
@@ -94,45 +94,64 @@ class VivunAnalytics {
     static def doSAToOpportunityAnalytics(Map config, List<Activity> activities, List<Opportunity> opportunities) {
         log.info("joining activities to opportunities")
         def updates = opportunities.inject([:].withDefault { [] }) { updateMap, opportunity ->
-            def matchingActivities = activities.findAll {
-                it.opportunity == opportunity.opportunityName && it.account == opportunity.account
-            }
+            def matchingActivities = activities.findAll { it.opportunityAccountHash == opportunity.opportunityAccountHash }
 
-            //get total activity count to allow us to calculate fractional SA contribution and money
-            def totalActivityCount = matchingActivities.size()
-            def totalActivityHours = matchingActivities.sum { it.hours }
+            //we only want to do this if we have new activities for a new or existing opp OR we have an updated opp that needs to be re-joined to old activity
+            if (matchingActivities.size() > 0 || opportunity.newUpdate) {
 
-            if (totalActivityCount > 0) {
-                //isolate SAs
-                def saActivities = matchingActivities.groupBy { it.createdBy }
+                //if we only have a subset of data, fetch potential existing records from ES
+                if (config.fetchSince) {
+                    //get any existing activities for this opportunity from ES so we don't update the opp record without that info
+                    def existingActivities = ESClientUtils.fetchActivitiesByOpportunity(config.es.client, config.es.indices.activities, opportunity.opportunityAccountHash)
 
-                def saActivitiesEnriched = saActivities.inject([]) { list, rawSaActivities ->
-                    rawSaActivities.each {
-                        def percentage = it.value.size() / totalActivityCount
-                        list << [
-                            name                  : it.key,
-                            activity_count        : it.value.size(),
-                            activity_hours        : it.value.sum { it.hours },
-                            activity_percentage   : percentage,
-                            adjusted_amount       : percentage * opportunity.amount,
-                            adjusted_new_expansion: percentage * opportunity.newAndUpsellAmount
-                        ]
+                    //if we have no matching activities in this batch, just use all the existing ones from ES (might be none)
+                    //else merge new activities w/ existing such that new overrides exist
+                    if (matchingActivities.size() == 0) {
+                        matchingActivities = existingActivities
+                    } else {
+                        def vivunActivityIds = matchingActivities.collect { it.heroActivityNumber }
+                        existingActivities.removeAll { vivunActivityIds.contains(it.heroActivityNumber) }
+                        matchingActivities += existingActivities
                     }
-                    return list
                 }
 
-                //create opportunity update record w/ SA field
-                updateMap[ESClient.BulkOps.UPDATE] << [
-                    _id     : opportunity.opportunityId, // our key
-                    _index  : config.es.indices.opportunities,
-                    enrich  : [
-                        sa_count      : saActivitiesEnriched.size(),
-                        activity_count: totalActivityCount,
-                        activity_hours: totalActivityHours,
-                        sa_detail     : saActivitiesEnriched
-                    ],
-                    sa_names: saActivities.keySet()
-                ]
+                if (matchingActivities.size() > 0) {
+
+                    //get total activity count to allow us to calculate fractional SA contribution and money
+                    def totalActivityCount = matchingActivities.size()
+                    def totalActivityHours = matchingActivities.sum { it.hours }
+
+                    //isolate SAs
+                    def saActivities = matchingActivities.groupBy { it.createdBy }
+
+                    def saActivitiesEnriched = saActivities.inject([]) { list, rawSaActivities ->
+                        rawSaActivities.each {
+                            def percentage = it.value.size() / totalActivityCount
+                            list << [
+                                name                  : it.key,
+                                activity_count        : it.value.size(),
+                                activity_hours        : it.value.sum { it.hours },
+                                activity_percentage   : percentage,
+                                adjusted_amount       : percentage * opportunity.amount,
+                                adjusted_new_expansion: percentage * opportunity.newAndUpsellAmount
+                            ]
+                        }
+                        return list
+                    }
+
+                    //create opportunity update record w/ SA field
+                    updateMap[ESClient.BulkOps.UPDATE] << [
+                        _id     : opportunity.opportunityId, // our key
+                        _index  : config.es.indices.opportunities,
+                        enrich  : [
+                            sa_count      : saActivitiesEnriched.size(),
+                            activity_count: totalActivityCount,
+                            activity_hours: totalActivityHours,
+                            sa_detail     : saActivitiesEnriched
+                        ],
+                        sa_names: saActivities.keySet()
+                    ]
+                }
             }
             return updateMap
         }
