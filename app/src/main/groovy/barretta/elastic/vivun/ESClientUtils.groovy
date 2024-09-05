@@ -22,7 +22,7 @@ class ESClientUtils {
         }
 
         log.debug("Bulk inserting to index [$index] with config: $esClient.config")
-        esClient.bulkInsert(inserts, index)
+        return esClient.bulkInsert(inserts, index)
     }
 
     static def bulkUpdateCsv(Map esClientConfig, List<VivunObject> records, String index) {
@@ -34,20 +34,20 @@ class ESClientUtils {
         }
 
         log.debug("Bulk updated to index [$index] with config: $esClient.config")
-        esClient.bulk( [(ESClient.BulkOps.UPDATE): updates], index )
+        return esClient.bulk( [(ESClient.BulkOps.UPDATE): updates], index )
     }
 
     static def bulk(Map esClientConfig, Map<ESClient.BulkOps, List<Map>> records) {
         def esClient = new ESClient(esClientConfig as ESClient.Config)
 
         log.debug("Bulk loading data with config: $esClient.config")
-        esClient.bulk(records)
+        return esClient.bulk(records)
     }
 
     static def reExecuteEnrichPolicy(Map esClientConfig, String policy) {
         def esClient = new ESClient(esClientConfig as ESClient.Config)
         log.info("refreshing enrichment policy [$policy]")
-        return esClient.enrich().executePolicy(new ExecutePolicyRequest(policy), RequestOptions.DEFAULT)
+        return esClient.deprecatedClient.enrich().executePolicy(new ExecutePolicyRequest(policy), RequestOptions.DEFAULT)
     }
 
     static List<Opportunity> fetchOpportunities(Map esClientConfig, String index) {
@@ -57,7 +57,6 @@ class ESClientUtils {
         log.info("fetching existing opportunities from ES")
         def opps = []
         esClient.scrollQuery(QueryBuilders.matchAllQuery(), 100, { opps << new Opportunity(it as SearchHit) })
-        esClient.close()
         return opps
     }
 
@@ -68,7 +67,6 @@ class ESClientUtils {
         log.debug("fetching existing activities from ES for opp-account hash [$opportunityAccountHash]")
         SearchResponse response = esClient.termQuery("opportunity_account_hash", opportunityAccountHash, index)
         List<Activity> activities = response.hits.inject([]) { list, hit -> list << new Activity(hit) }
-        esClient.close()
         return activities
     }
 }

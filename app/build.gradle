@@ -19,13 +19,13 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1.1-jre'
 
-    implementation 'com.github.mbarretta:es-client:93774e5'
+    implementation 'com.github.mbarretta:es-client:8b27651'
     implementation 'com.opencsv:opencsv:5.5.2'
     implementation 'ch.qos.logback:logback-classic:1.2.7'
     implementation 'co.elastic.logging:logback-ecs-encoder:1.2.0'
     implementation 'co.elastic.logging:ecs-logging-core:1.2.0'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.7'
 
-    // Use the awesome Spock testing and specification framework even with Java
     testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
     testImplementation 'junit:junit:4.13.2'
 }

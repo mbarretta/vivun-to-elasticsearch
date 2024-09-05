@@ -514,8 +514,10 @@ PUT _ingest/pipeline/opportunities-pipeline
           "Record Type",
           "Private",
           "Description",
+          "Amount Currency",
           "Amount",
           "Probability (%)",
+          "Expected Amount Currency",
           "Expected Amount",
           "Opportunity Type",
           "Next Step",
@@ -542,36 +544,46 @@ PUT _ingest/pipeline/opportunities-pipeline
           "Last Referenced Date",
           "Has Open Activity",
           "Has Overdue Task",
+          "Balance Currency",
           "Balance",
+          "Contract Amount Currency",
           "Contract Amount",
           "Can Revive?",
-          "Total Discount Amount",
           "Date Revived",
+          "ACV Upsell/Attrition Currency",
           "ACV Upsell/Attrition",
+          "TCV Amount Currency",
           "TCV Amount",
+          "Greatest Opp Line Amount Currency",
           "Greatest Opp Line Amount",
+          "ARR Amount Currency",
           "ARR Amount",
+          "Net Amount Currency",
           "Net Amount",
           "Hero Opportunity Flag",
-          "Presales Concern",
-          "Presales Stage",
+          "PreSales Concern",
+          "PreSales Stage",
           "Technical Differentiation",
+          "New & Upsell Amount Currency",
           "New & Upsell Amount",
+          "Base Renewal Amount Currency",
           "Base Renewal Amount",
+          "Expansion ACV Currency",
           "Expansion ACV",
+          "Renewal MY Currency",
           "Renewal MY",
+          "Renewed Subscription Amount (Renewal) Currency",
           "Renewed Subscription Amount (Renewal)",
+          "Total Partner Uplift Amount Currency",
           "Total Partner Uplift Amount",
+          "RM Forecast Currency",
           "RM Forecast",
+          "PO Amount (01) Currency",
           "PO Amount (01)",
-          "PO Amount (02)",
-          "PO Amount (03)",
-          "PO Amount (04)",
-          "PO Amount (05)",
+          "PO Amount Total Currency",
           "PO Amount Total",
           "My Geolocation (Latitude)",
           "My Geolocation (Longitude)",
-          "SA Manager Qualification",
           "SA Manager Comments"
         ],
         "ignore_missing": false
@@ -711,13 +723,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "Expansion ACV",
-        "pattern": "USD %{Expansion ACV}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "Expansion ACV",
         "pattern": ",",
@@ -729,13 +734,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "Expansion ACV",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "ACV Upsell/Attrition",
-        "pattern": "USD %{ACV Upsell Attrition}",
         "ignore_missing": true
       }
     },
@@ -755,13 +753,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "ARR Amount",
-        "pattern": "USD %{ARR Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "ARR Amount",
         "pattern": ",",
@@ -773,13 +764,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "ARR Amount",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Amount",
-        "pattern": "USD %{Amount}",
         "ignore_missing": true
       }
     },
@@ -799,13 +783,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "Base Renewal Amount",
-        "pattern": "USD %{Base Renewal Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "Base Renewal Amount",
         "pattern": ",",
@@ -817,13 +794,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "Base Renewal Amount",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Expected Amount",
-        "pattern": "USD %{Expected Amount}",
         "ignore_missing": true
       }
     },
@@ -843,13 +813,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "Greatest Opp Line Amount",
-        "pattern": "USD %{Greatest Opp Line Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "Greatest Opp Line Amount",
         "pattern": ",",
@@ -861,13 +824,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "Greatest Opp Line Amount",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Net Amount",
-        "pattern": "USD %{Net Amount}",
         "ignore_missing": true
       }
     },
@@ -887,13 +843,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "New And Upsell Amount",
-        "pattern": "USD %{New And Upsell Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "New And Upsell Amount",
         "pattern": ",",
@@ -905,13 +854,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "New And Upsell Amount",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "PO Amount (01)",
-        "pattern": "USD %{PO Amount (01)}",
         "ignore_missing": true
       }
     },
@@ -931,35 +873,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "PO Amount (02)",
-        "pattern": "USD %{PO Amount (02)}",
-        "ignore_missing": true
-      }
-    },
-    {
-      "gsub": {
-        "field": "PO Amount (02)",
-        "pattern": ",",
-        "replacement": "",
-        "ignore_missing": true
-      }
-    },
-    {
-      "convert": {
-        "field": "PO Amount (02)",
-        "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "PO Amount Total",
-        "pattern": "USD %{PO Amount Total}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "PO Amount Total",
         "pattern": ",",
@@ -971,13 +884,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "PO Amount Total",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Renewal MY",
-        "pattern": "USD %{Renewal MY}",
         "ignore_missing": true
       }
     },
@@ -997,13 +903,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "Renewed Subscription Amount (Renewal)",
-        "pattern": "USD %{Renewed Subscription Amount (Renewal)}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "Renewed Subscription Amount (Renewal)",
         "pattern": ",",
@@ -1015,13 +914,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "Renewed Subscription Amount (Renewal)",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "TCV Amount",
-        "pattern": "USD %{TCV Amount}",
         "ignore_missing": true
       }
     },
@@ -1041,35 +933,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       }
     },
     {
-      "dissect": {
-        "field": "Total Discount Amount",
-        "pattern": "USD %{Total Discount Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
-      "gsub": {
-        "field": "Total Discount Amount",
-        "pattern": ",",
-        "replacement": "",
-        "ignore_missing": true
-      }
-    },
-    {
-      "convert": {
-        "field": "Total Discount Amount",
-        "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Total Partner Uplift Amount",
-        "pattern": "USD %{Total Partner Uplift Amount}",
-        "ignore_missing": true
-      }
-    },
-    {
       "gsub": {
         "field": "Total Partner Uplift Amount",
         "pattern": ",",
@@ -1081,13 +944,6 @@ PUT _ingest/pipeline/opportunities-pipeline
       "convert": {
         "field": "Total Partner Uplift Amount",
         "type": "float",
-        "ignore_missing": true
-      }
-    },
-    {
-      "dissect": {
-        "field": "Contract Amount",
-        "pattern": "USD %{Contract Amount}",
         "ignore_missing": true
       }
     },
@@ -1134,7 +990,7 @@ PUT _ingest/pipeline/opportunities-pipeline
     {
       "convert": {
         "field": "Hero Score",
-        "type": "long",
+        "type": "float",
         "ignore_missing": true
       }
     },
@@ -1154,7 +1010,26 @@ PUT _ingest/pipeline/opportunities-pipeline
           "agent",
           "host",
           "log",
-          "ACV Upsell/Attrition"
+          "ACV Upsell/Attrition",
+          "Amount Currency",
+          "Expected Amount Currency",
+          "Opportunity Currency",
+          "Balance Currency",
+          "Contract Amount Currency",
+          "ACV Upsell/Attrition Currency",
+          "TCV Amount Currency",
+          "Greatest Opp Line Amount Currency",
+          "ARR Amount Currency",
+          "Net Amount Currency",
+          "New & Upsell Amount Currency",
+          "Base Renewal Amount Currency",
+          "Expansion ACV Currency",
+          "Renewal MY Currency",
+          "Renewed Subscription Amount (Renewal) Currency",
+          "Total Partner Uplift Amount Currency",
+          "RM Forecast Currency",
+          "PO Amount (01) Currency",
+          "PO Amount Total Currency"
         ],
         "ignore_missing": true
       }

@@ -1,12 +1,13 @@
 package barretta.elastic.vivun.objects
 
+import groovy.util.logging.Slf4j
 import org.elasticsearch.search.SearchHit
 
-import java.security.MessageDigest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class Opportunity extends VivunObject {
+@Slf4j
+class Opportunity extends VivunObject implements Comparable {
     def newUpdate = true
 
     Opportunity(String[] data) {
@@ -101,7 +102,6 @@ class Opportunity extends VivunObject {
             "Balance": balance,
             "Contract Amount": contractAmount,
             "Can Revive?": canRevive,
-            "Total Discount Amount": totalDiscountAmount,
             "Date Revived": dateRevived,
             "ACV Upsell Attrition": getACVUpsellAttrition(),
             "TCV Amount": getTCVAmount(),
@@ -120,14 +120,9 @@ class Opportunity extends VivunObject {
             "Total Partner Uplift Amount": totalPartnerUpliftAmount,
             "RM Forecast": getRMForecast(),
             "PO Amount (01)": getPOAmount01(),
-            "PO Amount (02)": getPOAmount02(),
-            "PO Amount (03)": getPOAmount03(),
-            "PO Amount (04)": getPOAmount04(),
-            "PO Amount (05)": getPOAmount05(),
             "PO Amount Total": getPOAmountTotal(),
             "My Geolocation (Latitude)": myGeolocationLatitude,
             "My Geolocation (Longitude)": myGeolocationLongitude,
-            "SA Manager Qualification": getSAManagerQualification(),
             "SA Manager Comments": getSAManagerComments()
         ]
     }
@@ -151,7 +146,7 @@ class Opportunity extends VivunObject {
     def getStage(stage) { dataArray[4] = stage }
     def getForecastCategory() { return dataArray[5] }
     def setForecastCategory(cat) { dataArray[5]  = cat}
-    def getHeroScore() { return dataArray[6] }
+    def getHeroScore() { return (dataArray[6] ?: 0) as float}
     def setHeroScore(score) { dataArray[6] = score }
     def getOpportunityId() { return dataArray[7] }
     def setOpportunityId(id) { dataArray[7] = id}
@@ -163,124 +158,138 @@ class Opportunity extends VivunObject {
     def setPrivate(pri) { dataArray[10] = pri }
     def getDescription() { return dataArray[11] }
     def setDescription(description) { dataArray[11] = description }
-    def getAmount() { return toNum(dataArray[12])}
-    def setAmount(amt) { dataArray[12] = amt}
-    def getProbability() { return dataArray[13] }
-    def setProbability(prob) { dataArray[13] = prob }
-    def getExpectedAmount() { return dataArray[14] }
-    def setExpectedAmount(amt) { dataArray[14] = amt }
-    def getOpportunityType() { return dataArray[15] }
-    def setOpportunityType(type) { dataArray[15] = type}
-    def getNextStep() { return dataArray[16] }
-    def setNextStep(step) { dataArray[16] = step }
-    def getLeadSource() { return dataArray[17] }
-    def setLeadSource(source) { dataArray[17] = source }
-    def getClosed() { return dataArray[18] }
-    def setClosed(closed) { dataArray[18] = closed }
-    def getWon() { return dataArray[19] }
-    def setWon(won) { dataArray[19] = won }
-    def getOpportunityCurrency() { return dataArray[20] }
-    def setOpportunityCurrency(curr) { dataArray[20] = curr }
-    def getCampaign() { return dataArray[21] }
-    def setCampaign(camp) { dataArray[21] = camp }
-    def getHasLineItem() { return dataArray[22] }
-    def setHasLineItem(i) { dataArray[22] = i }
-    def getIsSplit() { return dataArray[23] }
-    def setIsSplit(split) { dataArray[23] = split }
-    def getPriceBook() { return dataArray[24] }
-    def setPriceBook(book) { dataArray[24] = book }
-    def getTerritory() { return dataArray[25] }
-    def setTerritory(terr) { dataArray[25] = terr }
-    def getExcludeFromTheTerritoryAssignmentFilterLogic() { return dataArray[26] }
-    def setExcludeFromTheTerritoryAssignmentFilterLogic(logic) { dataArray[26] = logic }
-    def getCreatedDate() { return dataArray[27] }
-    def setCreatedDate(date) { dataArray[27] = date }
-    def getCreatedBy() { return dataArray[28] }
-    def setCreatedBy(by) { dataArray[28] = by }
-    def getLastModifiedDate() { return dataArray[29] }
-    def setLastModifiedDate(date) { dataArray[29] = date }
-    def getLastModifiedBy() { return dataArray[30] }
-    def setLastModifiedBy(by) { dataArray[30] = by }
-    def getSystemModstamp() { return dataArray[31] }
-    def setSystemModstamp(stamp) { dataArray[31] = stamp }
-    def getLastActivity() { return dataArray[32] }
-    def setLastActivity(act) { dataArray[32] = act}
-    def getFiscalQuarter() { return dataArray[33] }
-    def setFiscalQuarter(q) { dataArray[33] = q }
-    def getFiscalYear() { return dataArray[34] }
-    def setFiscalYear(y) { dataArray[34] = y }
-    def getFiscalPeriod() { return dataArray[35] }
-    def setFiscalPeriod(p) { dataArray[35] = p}
-    def getLastViewedDate() { return dataArray[36] }
-    def setLastViewedDate(d) { dataArray[36] = d }
-    def getLastReferencedDate() { return dataArray[37] }
-    def setLastReferencedDate(d) { dataArray[37] = d }
-    def getHasOpenActivity() { return dataArray[38] }
-    def setHasOpenActivity(a) { dataArray[38] = a }
-    def getHasOverdueTask() { return dataArray[39] }
-    def setHasOverdueTask(t) { dataArray[39] = t }
-    def getBalance() { return dataArray[40] }
-    def setBalance(b) { dataArray[40] = b }
-    def getContractAmount() { return dataArray[41] }
-    def setContractAmount(a) { dataArray[41] = a }
-    def getCanRevive() { return dataArray[42] }
-    def setCanRevive(r) { dataArray[42] = r }
-    def getTotalDiscountAmount() { return toNum(dataArray[43]) }
-    def setTotalDiscountAmount(a) { dataArray[43] = a }
-    def getDateRevived() { return dataArray[44] }
-    def setDateRevived(r) { dataArray[44] = r }
-    def getACVUpsellAttrition() { return dataArray[45] }
-    def setACVUpsellAttrition(a) { dataArray[45] = a }
-    def getTCVAmount() { return toNum(dataArray[46]) }
-    def setTCVAmount(a) { dataArray[46] = a }
-    def getGreatestOppLineAmount() { return dataArray[47] }
-    def setGreatestOppLineAmount(a) { dataArray[47] = a }
-    def getARRAmount() { return toNum(dataArray[48]) }
-    def setARRAmount(a) { dataArray[48] = a }
-    def getNetAmount() { return toNum(dataArray[49]) }
-    def setNetAmount(a) { dataArray[49] = a }
-    def getHeroOpportunityFlag() { return dataArray[50] }
-    def setHeroOpportunityFlag(f) { dataArray[50] = f }
-    def getPresalesConcern() { return dataArray[51] }
-    def setPresalesConcern(c) { dataArray[51] = c }
-    def getPresalesStage() { return dataArray[52] }
-    def setPresalesStage(s) { dataArray[52] = s }
-    def getTechnicalDifferentiation() { return dataArray[53] }
-    def setTechnicalDifferentiation(d) { dataArray[53] = d }
-    def getNewAndUpsellAmount() { return toNum(dataArray[54]) }
-    def setNewAndUpsellAmount(a) { dataArray[54] = a }
-    def getBaseRenewalAmount() { return toNum(dataArray[55]) }
-    def setBaseRenewalAmount(a) { dataArray[55] = a }
-    def getExpansionACV() { return toNum(dataArray[56]) }
-    def setExpansionACV(a) { dataArray[56] = a }
-    def getRenewalMY() { return toNum(dataArray[57]) }
-    def setRenewalMY(y) { dataArray[57] = y }
-    def getRenewedSubscriptionAmount() { return toNum(dataArray[58]) }
-    def setRenewedSubscriptionAmount(a) { dataArray[58] = a }
-    def getTotalPartnerUpliftAmount() { return toNum(dataArray[59]) }
-    def setTotalPartnerUpliftAmount(a) { dataArray[59] = a }
-    def getRMForecast() { return dataArray[60] }
-    def setRMForecast(f) { dataArray[60] = f }
-    def getPOAmount01() { return dataArray[61] }
-    def setPOAmount01(a) { dataArray[61] = a }
-    def getPOAmount02() { return dataArray[62] }
-    def setPOAmount02(a) { dataArray[62] = a }
-    def getPOAmount03() { return dataArray[63] }
-    def setPOAmount03(a) { dataArray[63] = a }
-    def getPOAmount04() { return dataArray[64] }
-    def setPOAmount04(a) { dataArray[64] = a }
-    def getPOAmount05() { return dataArray[65] }
-    def setPOAmount05(a) { dataArray[65] = a }
-    def getPOAmountTotal() { return toNum(dataArray[66]) }
-    def setPOAmountTotal(t) { dataArray[66] = t }
-    def getMyGeolocationLatitude() { return dataArray[67] }
-    def setMyGeolocationLatitude(l) { dataArray[67] = l}
-    def getMyGeolocationLongitude() { return dataArray[68] }
-    def setMyGeolocationLongitude(l) { dataArray[68] = l }
-    def getSAManagerQualification() { return dataArray[69] }
-    def setSAManagerQualification(q) { dataArray[69] = q}
-    def getSAManagerComments() { return dataArray[70] }
-    def setSAManagerComments(c) { dataArray[70] = c }
+    def getAmount() { return toNum(dataArray[13])}
+    def setAmount(amt) { dataArray[13] = amt}
+    def getProbability() { return dataArray[14] }
+    def setProbability(prob) { dataArray[14] = prob }
+    def getExpectedAmount() { return dataArray[16] }
+    def setExpectedAmount(amt) { dataArray[16] = amt }
+    def getOpportunityType() { return dataArray[17] }
+    def setOpportunityType(type) { dataArray[17] = type}
+    def getNextStep() { return dataArray[18] }
+    def setNextStep(step) { dataArray[18] = step }
+    def getLeadSource() { return dataArray[19] }
+    def setLeadSource(source) { dataArray[19] = source }
+    def getClosed() { return dataArray[20] }
+    def setClosed(closed) { dataArray[20] = closed }
+    def getWon() { return dataArray[21] }
+    def setWon(won) { dataArray[21] = won }
+    def getOpportunityCurrency() { return dataArray[22] }
+    def setOpportunityCurrency(curr) { dataArray[22] = curr }
+    def getCampaign() { return dataArray[23] }
+    def setCampaign(camp) { dataArray[23] = camp }
+    def getHasLineItem() { return dataArray[24] }
+    def setHasLineItem(i) { dataArray[24] = i }
+    def getIsSplit() { return dataArray[25] }
+    def setIsSplit(split) { dataArray[25] = split }
+    def getPriceBook() { return dataArray[26] }
+    def setPriceBook(book) { dataArray[26] = book }
+    def getTerritory() { return dataArray[27] }
+    def setTerritory(terr) { dataArray[27] = terr }
+    def getExcludeFromTheTerritoryAssignmentFilterLogic() { return dataArray[28] }
+    def setExcludeFromTheTerritoryAssignmentFilterLogic(logic) { dataArray[28] = logic }
+    def getCreatedDate() { return dataArray[29] }
+    def setCreatedDate(date) { dataArray[29] = date }
+    def getCreatedBy() { return dataArray[30] }
+    def setCreatedBy(by) { dataArray[30] = by }
+    def getLastModifiedDate() { return dataArray[31] }
+    def setLastModifiedDate(date) { dataArray[31] = date }
+    def getLastModifiedBy() { return dataArray[32] }
+    def setLastModifiedBy(by) { dataArray[32] = by }
+    def getSystemModstamp() { return dataArray[33] }
+    def setSystemModstamp(stamp) { dataArray[33] = stamp }
+    def getLastActivity() { return dataArray[34] }
+    def setLastActivity(act) { dataArray[34] = act}
+    def getFiscalQuarter() { return dataArray[35] }
+    def setFiscalQuarter(q) { dataArray[35] = q }
+    def getFiscalYear() { return dataArray[36] }
+    def setFiscalYear(y) { dataArray[36] = y }
+    def getFiscalPeriod() { return dataArray[37] }
+    def setFiscalPeriod(p) { dataArray[37] = p}
+    def getLastViewedDate() { return dataArray[38] }
+    def setLastViewedDate(d) { dataArray[38] = d }
+    def getLastReferencedDate() { return dataArray[39] }
+    def setLastReferencedDate(d) { dataArray[39] = d }
+    def getHasOpenActivity() { return dataArray[40] }
+    def setHasOpenActivity(a) { dataArray[40] = a }
+    def getHasOverdueTask() { return dataArray[41] }
+    def setHasOverdueTask(t) { dataArray[41] = t }
+    def getBalance() { return dataArray[43] }
+    def setBalance(b) { dataArray[43] = b }
+    def getContractAmount() { return dataArray[45] }
+    def setContractAmount(a) { dataArray[45] = a }
+    def getCanRevive() { return dataArray[46] }
+    def setCanRevive(r) { dataArray[46] = r }
+    def getDateRevived() { return dataArray[47] }
+    def setDateRevived(r) { dataArray[47] = r }
+    def getACVUpsellAttrition() { return dataArray[49] }
+    def setACVUpsellAttrition(a) { dataArray[49] = a }
+    def getTCVAmount() { return toNum(dataArray[51]) }
+    def setTCVAmount(a) { dataArray[51] = a }
+    def getGreatestOppLineAmount() { return dataArray[53] }
+    def setGreatestOppLineAmount(a) { dataArray[53] = a }
+    def getARRAmount() { return toNum(dataArray[55]) }
+    def setARRAmount(a) { dataArray[55] = a }
+    def getNetAmount() { return toNum(dataArray[57]) }
+    def setNetAmount(a) { dataArray[57] = a }
+    def getHeroOpportunityFlag() { return dataArray[58] }
+    def setHeroOpportunityFlag(f) { dataArray[58] = f }
+    def getPresalesConcern() { return dataArray[59] }
+    def setPresalesConcern(c) { dataArray[59] = c }
+    def getPresalesStage() { return dataArray[60] }
+    def setPresalesStage(s) { dataArray[60] = s }
+    def getTechnicalDifferentiation() { return dataArray[61] }
+    def setTechnicalDifferentiation(d) { dataArray[61] = d }
+    def getNewAndUpsellAmount() { return toNum(dataArray[63]) }
+    def setNewAndUpsellAmount(a) { dataArray[63] = a }
+    def getBaseRenewalAmount() { return toNum(dataArray[65]) }
+    def setBaseRenewalAmount(a) { dataArray[65] = a }
+    def getExpansionACV() { return toNum(dataArray[67]) }
+    def setExpansionACV(a) { dataArray[67] = a }
+    def getRenewalMY() { return toNum(dataArray[69]) }
+    def setRenewalMY(y) { dataArray[69] = y }
+    def getRenewedSubscriptionAmount() { return toNum(dataArray[71]) }
+    def setRenewedSubscriptionAmount(a) { dataArray[71] = a }
+    def getTotalPartnerUpliftAmount() { return toNum(dataArray[73]) }
+    def setTotalPartnerUpliftAmount(a) { dataArray[73] = a }
+    def getRMForecast() { return dataArray[75] }
+    def setRMForecast(f) { dataArray[75] = f }
+    def getPOAmount01() { return dataArray[77] }
+    def setPOAmount01(a) { dataArray[77] = a }
+    def getPOAmountTotal() { return toNum(dataArray[78]) }
+    def setPOAmountTotal(t) { dataArray[78] = t }
+    def getMyGeolocationLatitude() { return dataArray[79] }
+    def setMyGeolocationLatitude(l) { dataArray[79] = l}
+    def getMyGeolocationLongitude() { return dataArray[80] }
+    def setMyGeolocationLongitude(l) { dataArray[80] = l }
+    def getSAManagerComments() { return dataArray[81] }
+    def setSAManagerComments(c) { dataArray[81] = c }
 
     def getOpportunityAccountHash() { return fingerprint([account, opportunity]) }
+
+    @Override
+    int compareTo (Object o) {
+        def oOpp = o as Opportunity
+        def oDate
+        def thisDate
+        if (this.createdDate.contains("T")) {
+            thisDate = LocalDate.parse(this.createdDate, "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+        } else {
+            if (this.createdDate.length() == 10){
+                thisDate = LocalDate.parse(this.createdDate.toUpperCase(), "MM/dd/yyyy")
+            } else {
+                thisDate = LocalDate.parse(this.createdDate.toUpperCase(), "MM/dd/yyyy h:mm a")
+            }
+        }
+        if (oOpp.createdDate.contains("T")) {
+            oDate = LocalDate.parse(oOpp.createdDate, "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+        } else {
+            if (oOpp.createdDate.length() == 10){
+                oDate = LocalDate.parse(oOpp.createdDate.toUpperCase(), "MM/dd/yyyy")
+            } else {
+                oDate = LocalDate.parse(oOpp.createdDate.toUpperCase(), "MM/dd/yyyy h:mm a")
+            }
+        }
+        return oDate <=> thisDate
+    }
 }

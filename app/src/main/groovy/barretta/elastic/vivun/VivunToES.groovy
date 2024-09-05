@@ -4,6 +4,7 @@ package barretta.elastic.vivun
 import groovy.cli.picocli.CliBuilder
 import groovy.util.logging.Slf4j
 import groovy.yaml.YamlSlurper
+import org.elasticsearch.client.Cancellable
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
 
@@ -49,6 +50,8 @@ class VivunToES {
     private static def run() {
         if (config.fetchSince) {
             log.info("fetching data since [$config.fetchSince]")
+        } else {
+            log.info("fetching all data")
         }
 
         log.info("fetching deliverables...")
@@ -112,5 +115,4 @@ class VivunToES {
             it.write(new Yaml(dumper).dump(config))
         }
     }
-
 }
